@@ -1,0 +1,16 @@
+# Ignore Python virtual environment
+backend/venv/
+
+# Ignore environment files (API keys, secrets)
+.env
+
+# Ignore dependencies for frontend (Node.js)
+frontend/node_modules/
+
+# Ignore build files for frontend
+frontend/dist/
+frontend/.parcel-cache/
+
+# Ignore system-generated files
+.DS_Store
+Thumbs.db
