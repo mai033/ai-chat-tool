@@ -8,6 +8,9 @@ import {
   Container,
   Typography,
   Box,
+  List,
+  ListItem,
+  ListItemText,
 } from '@mui/material';
 
 interface ModelOption {
@@ -32,6 +35,9 @@ const App: React.FC = () => {
   const [userInput, setUserInput] = useState<string>('');
   const [response, setResponse] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [chatHistory, setChatHistory] = useState<
+    { input: string; output: string }[]
+  >([]);
 
   // Fetch available models from the backend and filter only the allowed ones
   useEffect(() => {
@@ -39,7 +45,7 @@ const App: React.FC = () => {
       try {
         const res = await fetch('http://127.0.0.1:5000/models');
         const data = await res.json();
-        
+
         if (data.models) {
           // Filter the models to include only those in the allowedModels set
           const filteredModels = data.models
@@ -84,8 +90,8 @@ const App: React.FC = () => {
       return;
     }
 
-    setLoading(true);  // Show loading indicator
-    setResponse('');   // Clear previous response
+    setLoading(true); // Show loading indicator
+    setResponse(''); // Clear previous response
 
     try {
       const res = await fetch('http://127.0.0.1:5000/chat', {
@@ -99,7 +105,14 @@ const App: React.FC = () => {
       });
 
       const data = await res.json();
-      setResponse(data.response || 'Error: ' + data.error);
+      const newResponse = data.response || 'Error: ' + data.error;
+      setResponse(newResponse);
+
+      // Update chat history
+      setChatHistory((prev) => [
+        ...prev,
+        { input: userInput, output: newResponse },
+      ]);
     } catch (error) {
       setResponse('Error: ' + (error as Error).message);
     } finally {
@@ -111,29 +124,30 @@ const App: React.FC = () => {
     <Box
       sx={{
         display: 'flex',
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        minHeight: '100vh', 
-        backgroundColor: '#e0e0e0', 
-        width: '100vw', 
-        padding: 2, 
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        backgroundColor: '#e0e0e0',
+        width: '100vw',
+        padding: 2,
       }}
     >
       <Container
         maxWidth="sm"
         sx={{
-          backgroundColor: 'white', 
+          backgroundColor: 'white',
           padding: 4,
           borderRadius: 2,
-          boxShadow: 3, 
+          boxShadow: 3,
           textAlign: 'center',
         }}
       >
+        {/* App Title */}
         <Typography
           variant="h4"
           align="center"
           gutterBottom
-          sx={{ color: 'black' }} 
+          sx={{ color: 'black' }}
         >
           AI Chat Tool
         </Typography>
@@ -193,21 +207,64 @@ const App: React.FC = () => {
           </Button>
         </Box>
 
-        {/* Response box */}
+        {/* Response Box */}
         {response && (
           <Box
             mt={4}
             p={2}
             sx={{
-              backgroundColor: '#ffffff', 
+              backgroundColor: '#ffffff',
               borderRadius: 1,
-              color: 'black', 
+              color: 'black',
               textAlign: 'center',
-              boxShadow: 1, 
+              boxShadow: 1,
             }}
           >
             <Typography variant="h6">Response:</Typography>
             <Typography>{response}</Typography>
+          </Box>
+        )}
+
+        {/* Chat History Section */}
+        {chatHistory.length > 0 && (
+          <Box mt={4}>
+            <Typography
+              variant="h5"
+              sx={{ fontWeight: 'bold', marginBottom: 2, color: 'black' }}
+            >
+              History
+            </Typography>
+            <List
+              sx={{
+                backgroundColor: '#f5f5f5',
+                borderRadius: 1,
+                color: 'black',
+                maxHeight: 300,
+                overflowY: 'auto',
+                padding: 2,
+                boxShadow: 1,
+              }}
+            >
+              {chatHistory.map((entry, index) => (
+                <ListItem
+                  key={index}
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-start',
+                  }}
+                >
+                  <ListItemText
+                    primary={`User: ${entry.input}`}
+                    sx={{ fontWeight: 'bold', color: 'black' }}
+                  />
+                  <ListItemText
+                    primary={`Bot: ${entry.output}`}
+                    sx={{ color: 'black' }}
+                  />
+                </ListItem>
+              ))}
+            </List>
           </Box>
         )}
       </Container>
@@ -216,4 +273,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-
