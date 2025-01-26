@@ -20,7 +20,7 @@ CORS(app)  # Enable CORS for frontend access
 openai_client = openai.OpenAI(api_key=OPENAI_API_KEY)
 anthropic_client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
-# Store chat history in memory (Consider using a database for long-term storage)
+# Chat history is stored in memory for now. A database would be used in a real app
 chat_history = []
 
 @app.route('/', methods=['GET'])
